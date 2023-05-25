@@ -8,8 +8,8 @@ from nukescripts import panels
 
 class TrimClipsPanel(nukescripts.PythonPanel):
 
-    def __init__(self):
-        nukescripts.PythonPanel.__init__(self, "Trim Clips")
+    def __init__(self, parent=None):
+        super(TrimClipsPanel, self).__init__(parent)
         self.trim_frames = nuke.Int_Knob('trim_frames', 'Trim Frames')
         self.trim_frames.setValue(8)
         self.addKnob(self.trim_frames)
@@ -32,12 +32,17 @@ class TrimClipsPanel(nukescripts.PythonPanel):
                 item.setTimes(in_offset, out_offset, srcin_offset, srcout_offset)
 
 
-# panel = TrimClipsPanel()
-# panel.show()
+# nukescripts.registerWidgetAsPanel('TrimClipsPanel', 'Trim Clips Panel', 'com.dansturm.TrimClipsPanel', False )
 
-def climTripsPanel():
-    climTripsPanelInstance = TrimClipsPanel()
+
+panel = TrimClipsPanel()
+panel.show()
+
+# def climTripsPanel():
+    # climTripsPanelInstance = TrimClipsPanel()
     # climTripsPanelInstance.show()
-    nuke.TrimClipsPanel = panels.registerWidgetAsPanel('TrimClipsPanel()', 'Trim Clips', 'com.dansturm.TrimClipsPanel')
+    # nuke.TrimClipsPanel = nukescripts.registerWidgetAsPanel('TrimClipsPanel()', 'Trim Clips', 'com.dansturm.TrimClipsPanel')
 
-climTripsPanel()
+
+
+# climTripsPanel()
