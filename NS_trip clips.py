@@ -32,17 +32,6 @@ class TrimClipsPanel(nukescripts.PythonPanel):
                 item.setTimes(in_offset, out_offset, srcin_offset, srcout_offset)
 
 
-# nukescripts.registerWidgetAsPanel('TrimClipsPanel', 'Trim Clips Panel', 'com.dansturm.TrimClipsPanel', False )
-
-
 panel = TrimClipsPanel()
 panel.show()
 
-# def climTripsPanel():
-    # climTripsPanelInstance = TrimClipsPanel()
-    # climTripsPanelInstance.show()
-    # nuke.TrimClipsPanel = nukescripts.registerWidgetAsPanel('TrimClipsPanel()', 'Trim Clips', 'com.dansturm.TrimClipsPanel')
-
-
-
-# climTripsPanel()
