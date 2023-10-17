@@ -22,6 +22,10 @@ class TrimClipsPanel(QtWidgets.QWidget):
         self.trim_frames.setMaximumWidth(50)
         layout.addWidget(self.trim_frames)
 
+        self.trim_button_slate = QtWidgets.QPushButton("Trim Slate (1 head frame)")
+        self.trim_button_slate.clicked.connect(self.trim_clips_slate)
+        layout.addWidget(self.trim_button_slate)
+
         self.trim_button_left = QtWidgets.QPushButton("Trim Clips (left)")
         self.trim_button_left.clicked.connect(self.trim_clips_left)
         layout.addWidget(self.trim_button_left)
@@ -67,7 +71,28 @@ class TrimClipsPanel(QtWidgets.QWidget):
                 original_timelineOut = item.timelineOut()
                 srcin_offset = item.sourceIn() + frames
                 srcout_offset = item.sourceOut() - frames
+                item.setTimes(in_offset, out_offset, srcin_offset, srcout_offset)    
+    
+
+    def trim_clips_slate(self):
+        frames = 1
+        sequence = hiero.ui.activeSequence()
+        selection = hiero.ui.getTimelineEditor(sequence).selection()
+
+        for index, item in enumerate(selection): 
+            if isinstance(item, hiero.core.TrackItem):
+                in_offset = item.timelineIn()
+                out_offset = item.timelineOut() - frames
+                original_timelineOut = item.timelineOut()
+                srcin_offset = item.sourceIn() + frames
+                srcout_offset = item.sourceOut()
                 item.setTimes(in_offset, out_offset, srcin_offset, srcout_offset)
+
+                if item.timelineIn() > 0:
+                    try:
+                        item.move(index*(-frames)) 
+                    except:
+                        pass
 
 
     def trim_clips_close(self):
