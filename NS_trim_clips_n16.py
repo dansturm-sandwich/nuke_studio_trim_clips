@@ -11,6 +11,7 @@ class TrimClipsPanel(QtWidgets.QWidget):
         self.setObjectName("com.dansturm.TrimClipsPanel.2")
         self.setWindowTitle("Trim Clips")
 
+        layout = QtWidgets.QHBoxLayout()
         layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
 
         label = QtWidgets.QLabel("Frames")
