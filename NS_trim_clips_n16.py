@@ -14,14 +14,29 @@ class TrimClipsPanel(QtWidgets.QWidget):
         layout = QtWidgets.QHBoxLayout()
         layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
 
-        label = QtWidgets.QLabel("Frames")
-        layout.addWidget(label)
+        heads_label = QtWidgets.QLabel("Heads")
+        layout.addWidget(heads_label)
 
-        self.trim_frames = QtWidgets.QLineEdit("8")
-        self.trim_frames.setValidator(QtGui.QIntValidator())
-        self.trim_frames.setMinimumWidth(50)
-        self.trim_frames.setMaximumWidth(50)
-        layout.addWidget(self.trim_frames)
+        self.heads = QtWidgets.QLineEdit("8")
+        self.heads.setValidator(QtGui.QIntValidator(0, 9999))
+        self.heads.setMinimumWidth(50)
+        self.heads.setMaximumWidth(50)
+        self.heads.textChanged.connect(self.on_heads_changed)
+        layout.addWidget(self.heads)
+
+        tails_label = QtWidgets.QLabel("Tails")
+        layout.addWidget(tails_label)
+
+        self.tails = QtWidgets.QLineEdit("8")
+        self.tails.setValidator(QtGui.QIntValidator(0, 9999))
+        self.tails.setMinimumWidth(50)
+        self.tails.setMaximumWidth(50)
+        self.tails.setEnabled(False)
+        layout.addWidget(self.tails)
+
+        self.asymmetrical = QtWidgets.QCheckBox("Asymmetrical")
+        self.asymmetrical.toggled.connect(self.on_asymmetrical_toggled)
+        layout.addWidget(self.asymmetrical)
 
         self.trim_button_slate = QtWidgets.QPushButton("Trim Slate (1 head frame)")
         self.trim_button_slate.clicked.connect(self.trim_clips_slate)
@@ -43,32 +58,56 @@ class TrimClipsPanel(QtWidgets.QWidget):
 
         self.setLayout(layout)
 
+    def on_asymmetrical_toggled(self, checked):
+        self.tails.setEnabled(checked)
+        if not checked:
+            self.tails.setText(self.heads.text())
+
+    def on_heads_changed(self, text):
+        if not self.asymmetrical.isChecked():
+            self.tails.setText(text)
+
+    def handle_counts(self):
+        heads = self.frame_count(self.heads)
+        if self.asymmetrical.isChecked():
+            tails = self.frame_count(self.tails)
+        else:
+            tails = heads
+        return heads, tails
+
+    def frame_count(self, field):
+        text = field.text().strip()
+        if not text:
+            return 0
+        return int(text)
+
     def trim_clips_left(self):
-        frames = int(self.trim_frames.text())
+        heads, tails = self.handle_counts()
+        removed = heads + tails
         sequence = hiero.ui.activeSequence()
         selection = hiero.ui.getTimelineEditor(sequence).selection()
 
         for index, item in enumerate(selection): 
             if isinstance(item, hiero.core.TrackItem):
                 in_offset = item.timelineIn()
-                out_offset = item.timelineOut() - (2 * frames)
+                out_offset = item.timelineOut() - removed
                 original_timelineOut = item.timelineOut()
-                srcin_offset = item.sourceIn() + frames
-                srcout_offset = item.sourceOut() - frames
+                srcin_offset = item.sourceIn() + heads
+                srcout_offset = item.sourceOut() - tails
                 item.setTimes(in_offset, out_offset, srcin_offset, srcout_offset)
 
     def trim_clips_center(self):
-        frames = int(self.trim_frames.text())
+        heads, tails = self.handle_counts()
         sequence = hiero.ui.activeSequence()
         selection = hiero.ui.getTimelineEditor(sequence).selection()
 
         for index, item in enumerate(selection): 
             if isinstance(item, hiero.core.TrackItem):
-                in_offset = item.timelineIn() + frames
-                out_offset = item.timelineOut() - frames
+                in_offset = item.timelineIn() + heads
+                out_offset = item.timelineOut() - tails
                 original_timelineOut = item.timelineOut()
-                srcin_offset = item.sourceIn() + frames
-                srcout_offset = item.sourceOut() - frames
+                srcin_offset = item.sourceIn() + heads
+                srcout_offset = item.sourceOut() - tails
                 item.setTimes(in_offset, out_offset, srcin_offset, srcout_offset)    
     
     def trim_clips_slate(self):
@@ -92,17 +131,18 @@ class TrimClipsPanel(QtWidgets.QWidget):
                         pass
 
     def trim_clips_close(self):
-        frames = int(self.trim_frames.text())
+        heads, tails = self.handle_counts()
+        removed = heads + tails
         sequence = hiero.ui.activeSequence()
         selection = hiero.ui.getTimelineEditor(sequence).selection()
 
         for index, item in enumerate(selection): 
             if isinstance(item, hiero.core.TrackItem):
                 in_offset = item.timelineIn()
-                out_offset = item.timelineOut() - (2 * frames)
+                out_offset = item.timelineOut() - removed
                 original_timelineOut = item.timelineOut()
-                srcin_offset = item.sourceIn() + frames
-                srcout_offset = item.sourceOut() - frames
+                srcin_offset = item.sourceIn() + heads
+                srcout_offset = item.sourceOut() - tails
                 item.setTimes(in_offset, out_offset, srcin_offset, srcout_offset)
 
                 # Ripple clips for all tracks (currently commented out)
@@ -110,7 +150,7 @@ class TrimClipsPanel(QtWidgets.QWidget):
 
                 if item.timelineIn() > 0:
                     try:
-                        item.move(index * (-frames * 2)) 
+                        item.move(index * (-removed)) 
                     except Exception:
                         pass
 
