@@ -15,7 +15,7 @@ def ask_handles():
 
     tails_box = QtWidgets.QSpinBox()
     tails_box.setRange(0, 9999)
-    tails_box.setValue(1)
+    tails_box.setValue(0)
 
     layout.addRow("Heads", heads_box)
     layout.addRow("Tails", tails_box)
